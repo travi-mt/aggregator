@@ -24,10 +24,9 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().authenticated() // wszystko wymaga Basic Auth
-                )
+                        .anyRequest().authenticated())
                 .httpBasic(httpBasic -> {
-                }); // nowy Lambda DSL
+                });
 
         return http.build();
     }

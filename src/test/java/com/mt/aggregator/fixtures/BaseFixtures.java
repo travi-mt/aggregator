@@ -10,12 +10,14 @@ import java.util.List;
 
 public final class BaseFixtures {
 
+    public static final String SAMPLE_PRODUCT_ID = "123";
+
     private BaseFixtures() {
     }
 
     public static CatalogDto getCatalogData() {
         return new CatalogDto(
-                "123",
+                SAMPLE_PRODUCT_ID,
                 "Product 123",
                 "Sample description",
                 List.of("A", "B"),
@@ -38,7 +40,7 @@ public final class BaseFixtures {
 
     public static PricingDto getVipPricingData() {
         return new PricingDto(
-                "123",
+                SAMPLE_PRODUCT_ID,
                 BigDecimal.valueOf(100),
                 BigDecimal.valueOf(20),
                 BigDecimal.valueOf(80));
@@ -46,7 +48,7 @@ public final class BaseFixtures {
 
     public static PricingDto getStandardPricingData() {
         return new PricingDto(
-                "123",
+                SAMPLE_PRODUCT_ID,
                 BigDecimal.valueOf(100),
                 BigDecimal.ZERO,
                 BigDecimal.valueOf(100));
@@ -54,7 +56,7 @@ public final class BaseFixtures {
 
     public static AvailabilityDto getAvailabilityData() {
         return new AvailabilityDto(
-                "123",
+                SAMPLE_PRODUCT_ID,
                 10,
                 "WH-01",
                 "2026-10-01");

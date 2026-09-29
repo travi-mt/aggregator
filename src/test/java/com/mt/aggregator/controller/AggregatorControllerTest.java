@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static com.mt.aggregator.fixtures.BaseFixtures.SAMPLE_PRODUCT_ID;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -41,7 +42,7 @@ class AggregatorControllerTest {
         void shouldReturnProductInfo() throws Exception {
                 when(aggregatorService.aggregate("123", "CUST-001"))
                                 .thenReturn(new ProductResponse(
-                                                "123",
+                                                SAMPLE_PRODUCT_ID,
                                                 "Product 123",
                                                 "Sample description",
                                                 List.of("Spec A", "Spec B"),
@@ -65,14 +66,13 @@ class AggregatorControllerTest {
 
         @Test
         void shouldFailWhenCatalogFails() throws Exception {
-                when(aggregatorService.aggregate("123", "CUST-001"))
+                when(aggregatorService.aggregate(SAMPLE_PRODUCT_ID, "CUST-001"))
                                 .thenThrow(new CatalogUnavailableException(
                                                 "Catalog unavailable. Try again in a few seconds."));
 
                 mockMvc.perform(get("/aggregate/product-info/123")
                                 .param("customerId", "CUST-001")
                                 .with(httpBasic(username, password)))
-                                .andExpect(status().isServiceUnavailable())
                                 .andExpect(status().isServiceUnavailable())
                                 .andExpect(content().contentTypeCompatibleWith(
                                                 MediaType.APPLICATION_PROBLEM_JSON))
@@ -85,7 +85,7 @@ class AggregatorControllerTest {
         @Test
         void shouldReturnNullPricingWhenPricingFails() throws Exception {
                 ProductResponse response = new ProductResponse(
-                                "123",
+                                SAMPLE_PRODUCT_ID,
                                 "Product 123",
                                 "Sample description",
                                 List.of("Spec A"),
@@ -94,7 +94,7 @@ class AggregatorControllerTest {
                                 BaseFixtures.getAvailabilityData(),
                                 BaseFixtures.getVipCustomerData());
 
-                when(aggregatorService.aggregate("123", "CUST-001"))
+                when(aggregatorService.aggregate(SAMPLE_PRODUCT_ID, "CUST-001"))
                                 .thenReturn(response);
 
                 mockMvc.perform(get("/aggregate/product-info/123")
@@ -102,7 +102,7 @@ class AggregatorControllerTest {
                                 .with(httpBasic(username, password)))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.pricing").doesNotExist())
-                                .andExpect(jsonPath("$.id").value("123"))
+                                .andExpect(jsonPath("$.id").value(SAMPLE_PRODUCT_ID))
                                 .andExpect(jsonPath("$.name").value("Product 123"))
                                 .andExpect(jsonPath("$.availability.stockLevel").value(10))
                                 .andExpect(jsonPath("$.customer.segment").value("VIP"));
@@ -111,7 +111,7 @@ class AggregatorControllerTest {
         @Test
         void shouldReturnProductWithNullAvailabilityWhenAvailabilityFails() throws Exception {
                 ProductResponse response = new ProductResponse(
-                                "123",
+                                SAMPLE_PRODUCT_ID,
                                 "Product 123",
                                 "Sample description",
                                 List.of("Spec A", "Spec B"),
@@ -120,7 +120,7 @@ class AggregatorControllerTest {
                                 null, // availability failed
                                 BaseFixtures.getVipCustomerData());
 
-                when(aggregatorService.aggregate("123", "CUST-001"))
+                when(aggregatorService.aggregate(SAMPLE_PRODUCT_ID, "CUST-001"))
                                 .thenReturn(response);
 
                 mockMvc.perform(get("/aggregate/product-info/123")
@@ -135,7 +135,7 @@ class AggregatorControllerTest {
         @Test
         void shouldReturnProductWithNullCustomerWhenCustomerFails() throws Exception {
                 ProductResponse response = new ProductResponse(
-                                "123",
+                                SAMPLE_PRODUCT_ID,
                                 "Product 123",
                                 "Sample description",
                                 List.of("Spec A", "Spec B"),
@@ -145,7 +145,7 @@ class AggregatorControllerTest {
                                 null // customer failed
                 );
 
-                when(aggregatorService.aggregate("123", "CUST-001"))
+                when(aggregatorService.aggregate(SAMPLE_PRODUCT_ID, "CUST-001"))
                                 .thenReturn(response);
 
                 mockMvc.perform(get("/aggregate/product-info/123")
@@ -160,7 +160,7 @@ class AggregatorControllerTest {
         @Test
         void shouldReturnNullCustomerAndPricingWhenCustomerIdMissing() throws Exception {
                 ProductResponse response = new ProductResponse(
-                                "123",
+                                SAMPLE_PRODUCT_ID,
                                 "Product 123",
                                 "Sample description",
                                 List.of("Spec A", "Spec B"),
@@ -170,7 +170,7 @@ class AggregatorControllerTest {
                                 null // customer null
                 );
 
-                when(aggregatorService.aggregate("123", null))
+                when(aggregatorService.aggregate(SAMPLE_PRODUCT_ID, null))
                                 .thenReturn(response);
 
                 mockMvc.perform(get("/aggregate/product-info/123")
@@ -185,7 +185,7 @@ class AggregatorControllerTest {
         void shouldReturnProductWithoutCustomerWhenCustomerIdDoesNotExist() throws Exception {
                 when(aggregatorService.aggregate("123", "INVALID-CUSTOMER"))
                                 .thenReturn(new ProductResponse(
-                                                "123",
+                                                SAMPLE_PRODUCT_ID,
                                                 "Product 123",
                                                 "Sample description",
                                                 List.of("Spec A", "Spec B"),
@@ -198,7 +198,7 @@ class AggregatorControllerTest {
                                 .param("customerId", "INVALID-CUSTOMER")
                                 .with(httpBasic(username, password)))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.id").value("123"))
+                                .andExpect(jsonPath("$.id").value(SAMPLE_PRODUCT_ID))
                                 .andExpect(jsonPath("$.pricing.finalPrice").value(100))
                                 .andExpect(jsonPath("$.availability.stockLevel").value(10))
                                 .andExpect(jsonPath("$.customer").doesNotExist());
@@ -215,7 +215,6 @@ class AggregatorControllerTest {
                 mockMvc.perform(get("/aggregate/product-info/INVALID-PRODUCT")
                                 .param("customerId", "CUST-001")
                                 .with(httpBasic(username, password)))
-                                .andExpect(status().isNotFound())
                                 .andExpect(status().isNotFound())
                                 .andExpect(content().contentTypeCompatibleWith(
                                                 MediaType.APPLICATION_PROBLEM_JSON))

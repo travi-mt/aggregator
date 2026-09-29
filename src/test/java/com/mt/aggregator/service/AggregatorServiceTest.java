@@ -18,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static com.mt.aggregator.fixtures.BaseFixtures.SAMPLE_PRODUCT_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -47,22 +48,22 @@ class AggregatorServiceTest {
 
         @Test
         void shouldReturnFullyAggregatedProductWhenAllUpstreamsSucceed() {
-                when(catalog.getCatalog("123"))
+                when(catalog.getCatalog(SAMPLE_PRODUCT_ID))
                                 .thenReturn(BaseFixtures.getCatalogData());
 
                 when(customer.getCustomer("CUST-001"))
                                 .thenReturn(BaseFixtures.getVipCustomerData());
 
-                when(pricing.getPricing("123", BaseFixtures.getVipCustomerData()))
+                when(pricing.getPricing(SAMPLE_PRODUCT_ID, BaseFixtures.getVipCustomerData()))
                                 .thenReturn(BaseFixtures.getVipPricingData());
 
-                when(availability.getAvailability("123"))
+                when(availability.getAvailability(SAMPLE_PRODUCT_ID))
                                 .thenReturn(BaseFixtures.getAvailabilityData());
 
-                ProductResponse result = sut.aggregate("123", "CUST-001");
+                ProductResponse result = sut.aggregate(SAMPLE_PRODUCT_ID, "CUST-001");
 
                 assertNotNull(result);
-                assertEquals("123", result.id());
+                assertEquals(SAMPLE_PRODUCT_ID, result.id());
                 assertEquals("Product 123", result.name());
                 assertEquals("Sample description", result.description());
                 assertEquals(
@@ -86,7 +87,7 @@ class AggregatorServiceTest {
 
         @Test
         void shouldReturnProductWithoutPricingWhenPricingIsUnavailable() {
-                when(catalog.getCatalog("123"))
+                when(catalog.getCatalog(SAMPLE_PRODUCT_ID))
                                 .thenReturn(BaseFixtures.getCatalogData());
 
                 when(customer.getCustomer("CUST-001"))
@@ -96,13 +97,13 @@ class AggregatorServiceTest {
                                 .thenThrow(new UpstreamUnavailableException(
                                                 "Pricing upstream unavailable"));
 
-                when(availability.getAvailability("123"))
+                when(availability.getAvailability(SAMPLE_PRODUCT_ID))
                                 .thenReturn(BaseFixtures.getAvailabilityData());
 
-                ProductResponse result = sut.aggregate("123", "CUST-001");
+                ProductResponse result = sut.aggregate(SAMPLE_PRODUCT_ID, "CUST-001");
 
                 assertNotNull(result);
-                assertEquals("123", result.id());
+                assertEquals(SAMPLE_PRODUCT_ID, result.id());
                 assertEquals("Product 123", result.name());
 
                 assertNull(result.pricing());
@@ -116,7 +117,7 @@ class AggregatorServiceTest {
 
         @Test
         void shouldReturnProductWithoutPricingWhenPricingRequestIsInterrupted() {
-                when(catalog.getCatalog("123"))
+                when(catalog.getCatalog(SAMPLE_PRODUCT_ID))
                                 .thenReturn(BaseFixtures.getCatalogData());
 
                 when(customer.getCustomer("CUST-001"))
@@ -127,10 +128,10 @@ class AggregatorServiceTest {
                                                 "Pricing request was interrupted",
                                                 new InterruptedException()));
 
-                when(availability.getAvailability("123"))
+                when(availability.getAvailability(SAMPLE_PRODUCT_ID))
                                 .thenReturn(BaseFixtures.getAvailabilityData());
 
-                ProductResponse result = sut.aggregate("123", "CUST-001");
+                ProductResponse result = sut.aggregate(SAMPLE_PRODUCT_ID, "CUST-001");
 
                 assertNotNull(result);
                 assertNull(result.pricing());
@@ -144,23 +145,23 @@ class AggregatorServiceTest {
 
         @Test
         void shouldReturnProductWithoutAvailabilityWhenAvailabilityIsUnavailable() {
-                when(catalog.getCatalog("123"))
+                when(catalog.getCatalog(SAMPLE_PRODUCT_ID))
                                 .thenReturn(BaseFixtures.getCatalogData());
 
                 when(customer.getCustomer("CUST-001"))
                                 .thenReturn(BaseFixtures.getVipCustomerData());
 
-                when(pricing.getPricing("123", BaseFixtures.getVipCustomerData()))
+                when(pricing.getPricing(SAMPLE_PRODUCT_ID, BaseFixtures.getVipCustomerData()))
                                 .thenReturn(BaseFixtures.getVipPricingData());
 
-                when(availability.getAvailability("123"))
+                when(availability.getAvailability(SAMPLE_PRODUCT_ID))
                                 .thenThrow(new UpstreamUnavailableException(
                                                 "Availability upstream unavailable"));
 
-                ProductResponse result = sut.aggregate("123", "CUST-001");
+                ProductResponse result = sut.aggregate(SAMPLE_PRODUCT_ID, "CUST-001");
 
                 assertNotNull(result);
-                assertEquals("123", result.id());
+                assertEquals(SAMPLE_PRODUCT_ID, result.id());
 
                 assertNull(result.availability());
 
@@ -173,21 +174,21 @@ class AggregatorServiceTest {
 
         @Test
         void shouldReturnProductWithoutAvailabilityWhenAvailabilityRequestIsInterrupted() {
-                when(catalog.getCatalog("123"))
+                when(catalog.getCatalog(SAMPLE_PRODUCT_ID))
                                 .thenReturn(BaseFixtures.getCatalogData());
 
                 when(customer.getCustomer("CUST-001"))
                                 .thenReturn(BaseFixtures.getVipCustomerData());
 
-                when(pricing.getPricing("123", BaseFixtures.getVipCustomerData()))
+                when(pricing.getPricing(SAMPLE_PRODUCT_ID, BaseFixtures.getVipCustomerData()))
                                 .thenReturn(BaseFixtures.getVipPricingData());
 
-                when(availability.getAvailability("123"))
+                when(availability.getAvailability(SAMPLE_PRODUCT_ID))
                                 .thenThrow(new UpstreamInterruptedException(
                                                 "Availability request was interrupted",
                                                 new InterruptedException()));
 
-                ProductResponse result = sut.aggregate("123", "CUST-001");
+                ProductResponse result = sut.aggregate(SAMPLE_PRODUCT_ID, "CUST-001");
 
                 assertNotNull(result);
                 assertNull(result.availability());
@@ -201,20 +202,20 @@ class AggregatorServiceTest {
 
         @Test
         void shouldReturnProductWithoutCustomerWhenCustomerIsUnavailable() {
-                when(catalog.getCatalog("123"))
+                when(catalog.getCatalog(SAMPLE_PRODUCT_ID))
                                 .thenReturn(BaseFixtures.getCatalogData());
 
                 when(customer.getCustomer("CUST-001"))
                                 .thenThrow(new UpstreamUnavailableException(
                                                 "Customer upstream unavailable"));
 
-                when(pricing.getPricing("123", null))
+                when(pricing.getPricing(SAMPLE_PRODUCT_ID, null))
                                 .thenReturn(BaseFixtures.getStandardPricingData());
 
-                when(availability.getAvailability("123"))
+                when(availability.getAvailability(SAMPLE_PRODUCT_ID))
                                 .thenReturn(BaseFixtures.getAvailabilityData());
 
-                ProductResponse result = sut.aggregate("123", "CUST-001");
+                ProductResponse result = sut.aggregate(SAMPLE_PRODUCT_ID, "CUST-001");
 
                 assertNotNull(result);
 
@@ -231,7 +232,7 @@ class AggregatorServiceTest {
 
         @Test
         void shouldReturnProductWithoutCustomerWhenCustomerRequestIsInterrupted() {
-                when(catalog.getCatalog("123"))
+                when(catalog.getCatalog(SAMPLE_PRODUCT_ID))
                                 .thenReturn(BaseFixtures.getCatalogData());
 
                 when(customer.getCustomer("CUST-001"))
@@ -239,13 +240,13 @@ class AggregatorServiceTest {
                                                 "Customer request was interrupted",
                                                 new InterruptedException()));
 
-                when(pricing.getPricing("123", null))
+                when(pricing.getPricing(SAMPLE_PRODUCT_ID, null))
                                 .thenReturn(BaseFixtures.getStandardPricingData());
 
-                when(availability.getAvailability("123"))
+                when(availability.getAvailability(SAMPLE_PRODUCT_ID))
                                 .thenReturn(BaseFixtures.getAvailabilityData());
 
-                ProductResponse result = sut.aggregate("123", "CUST-001");
+                ProductResponse result = sut.aggregate(SAMPLE_PRODUCT_ID, "CUST-001");
 
                 assertNotNull(result);
                 assertNull(result.customer());
@@ -259,16 +260,16 @@ class AggregatorServiceTest {
 
         @Test
         void shouldReturnStandardPricingWhenCustomerIdIsNotProvided() {
-                when(catalog.getCatalog("123"))
+                when(catalog.getCatalog(SAMPLE_PRODUCT_ID))
                                 .thenReturn(BaseFixtures.getCatalogData());
 
-                when(pricing.getPricing("123", null))
+                when(pricing.getPricing(SAMPLE_PRODUCT_ID, null))
                                 .thenReturn(BaseFixtures.getStandardPricingData());
 
-                when(availability.getAvailability("123"))
+                when(availability.getAvailability(SAMPLE_PRODUCT_ID))
                                 .thenReturn(BaseFixtures.getAvailabilityData());
 
-                ProductResponse result = sut.aggregate("123", null);
+                ProductResponse result = sut.aggregate(SAMPLE_PRODUCT_ID, null);
 
                 assertNotNull(result);
 
@@ -287,7 +288,7 @@ class AggregatorServiceTest {
 
         @Test
         void shouldReturnPersonalizedPricingWhenCustomerIsAvailable() {
-                when(catalog.getCatalog("123"))
+                when(catalog.getCatalog(SAMPLE_PRODUCT_ID))
                                 .thenReturn(BaseFixtures.getCatalogData());
 
                 CustomerDto vipCustomer = BaseFixtures.getVipCustomerData();
@@ -295,13 +296,13 @@ class AggregatorServiceTest {
                 when(customer.getCustomer("CUST-001"))
                                 .thenReturn(vipCustomer);
 
-                when(pricing.getPricing("123", vipCustomer))
+                when(pricing.getPricing(SAMPLE_PRODUCT_ID, vipCustomer))
                                 .thenReturn(BaseFixtures.getVipPricingData());
 
-                when(availability.getAvailability("123"))
+                when(availability.getAvailability(SAMPLE_PRODUCT_ID))
                                 .thenReturn(BaseFixtures.getAvailabilityData());
 
-                ProductResponse result = sut.aggregate("123", "CUST-001");
+                ProductResponse result = sut.aggregate(SAMPLE_PRODUCT_ID, "CUST-001");
 
                 assertNotNull(result);
 
@@ -316,20 +317,20 @@ class AggregatorServiceTest {
 
         @Test
         void shouldReturnProductWithStandardPricingWhenCustomerLookupFails() {
-                when(catalog.getCatalog("123"))
+                when(catalog.getCatalog(SAMPLE_PRODUCT_ID))
                                 .thenReturn(BaseFixtures.getCatalogData());
 
                 when(customer.getCustomer("CUST-001"))
                                 .thenThrow(new UpstreamUnavailableException(
                                                 "Customer upstream unavailable"));
 
-                when(pricing.getPricing("123", null))
+                when(pricing.getPricing(SAMPLE_PRODUCT_ID, null))
                                 .thenReturn(BaseFixtures.getStandardPricingData());
 
-                when(availability.getAvailability("123"))
+                when(availability.getAvailability(SAMPLE_PRODUCT_ID))
                                 .thenReturn(BaseFixtures.getAvailabilityData());
 
-                ProductResponse result = sut.aggregate("123", "CUST-001");
+                ProductResponse result = sut.aggregate(SAMPLE_PRODUCT_ID, "CUST-001");
 
                 assertNotNull(result);
 
@@ -346,13 +347,13 @@ class AggregatorServiceTest {
 
         @Test
         void shouldFailWholeRequestWhenCatalogIsUnavailable() {
-                when(catalog.getCatalog("123"))
+                when(catalog.getCatalog(SAMPLE_PRODUCT_ID))
                                 .thenThrow(new UpstreamUnavailableException(
                                                 "Catalog upstream unavailable"));
 
                 CatalogUnavailableException exception = assertThrows(
                                 CatalogUnavailableException.class,
-                                () -> sut.aggregate("123", "CUST-001"));
+                                () -> sut.aggregate(SAMPLE_PRODUCT_ID, "CUST-001"));
 
                 assertEquals(
                                 "Catalog unavailable. Try again in a few seconds.",
@@ -365,14 +366,14 @@ class AggregatorServiceTest {
 
         @Test
         void shouldFailWholeRequestWhenCatalogRequestIsInterrupted() {
-                when(catalog.getCatalog("123"))
+                when(catalog.getCatalog(SAMPLE_PRODUCT_ID))
                                 .thenThrow(new UpstreamInterruptedException(
                                                 "Catalog request was interrupted",
                                                 new InterruptedException()));
 
                 CatalogUnavailableException exception = assertThrows(
                                 CatalogUnavailableException.class,
-                                () -> sut.aggregate("123", "CUST-001"));
+                                () -> sut.aggregate(SAMPLE_PRODUCT_ID, "CUST-001"));
 
                 assertEquals(
                                 "Catalog request was interrupted.",
@@ -385,7 +386,7 @@ class AggregatorServiceTest {
 
         @Test
         void shouldUseCustomerForPricingWhenCustomerIdIsProvidedAndCustomerIsAvailable() {
-                when(catalog.getCatalog("123"))
+                when(catalog.getCatalog(SAMPLE_PRODUCT_ID))
                                 .thenReturn(BaseFixtures.getCatalogData());
 
                 CustomerDto customerDto = BaseFixtures.getVipCustomerData();
@@ -395,13 +396,13 @@ class AggregatorServiceTest {
 
                 PricingDto pricingDto = BaseFixtures.getVipPricingData();
 
-                when(pricing.getPricing("123", customerDto))
+                when(pricing.getPricing(SAMPLE_PRODUCT_ID, customerDto))
                                 .thenReturn(pricingDto);
 
-                when(availability.getAvailability("123"))
+                when(availability.getAvailability(SAMPLE_PRODUCT_ID))
                                 .thenReturn(BaseFixtures.getAvailabilityData());
 
-                ProductResponse result = sut.aggregate("123", "CUST-001");
+                ProductResponse result = sut.aggregate(SAMPLE_PRODUCT_ID, "CUST-001");
 
                 assertNotNull(result.customer());
                 assertEquals("VIP", result.customer().segment());
@@ -409,75 +410,75 @@ class AggregatorServiceTest {
                 assertNotNull(result.pricing());
                 assertEquals(80, result.pricing().finalPrice().intValue());
 
-                verify(pricing).getPricing("123", customerDto);
+                verify(pricing).getPricing(SAMPLE_PRODUCT_ID, customerDto);
         }
 
         @Test
         void shouldUseNullCustomerForPricingWhenCustomerLookupFails() {
-                when(catalog.getCatalog("123"))
+                when(catalog.getCatalog(SAMPLE_PRODUCT_ID))
                                 .thenReturn(BaseFixtures.getCatalogData());
 
                 when(customer.getCustomer("CUST-001"))
                                 .thenThrow(new UpstreamUnavailableException(
                                                 "Customer upstream unavailable"));
 
-                when(pricing.getPricing("123", null))
+                when(pricing.getPricing(SAMPLE_PRODUCT_ID, null))
                                 .thenReturn(BaseFixtures.getStandardPricingData());
 
-                when(availability.getAvailability("123"))
+                when(availability.getAvailability(SAMPLE_PRODUCT_ID))
                                 .thenReturn(BaseFixtures.getAvailabilityData());
 
-                ProductResponse result = sut.aggregate("123", "CUST-001");
+                ProductResponse result = sut.aggregate(SAMPLE_PRODUCT_ID, "CUST-001");
 
                 assertNull(result.customer());
 
                 assertNotNull(result.pricing());
                 assertEquals(100, result.pricing().finalPrice().intValue());
 
-                verify(pricing).getPricing("123", null);
+                verify(pricing).getPricing(SAMPLE_PRODUCT_ID, null);
         }
 
         @Test
         void shouldUseNullCustomerForPricingWhenCustomerDoesNotExist() {
-                when(catalog.getCatalog("123"))
+                when(catalog.getCatalog(SAMPLE_PRODUCT_ID))
                                 .thenReturn(BaseFixtures.getCatalogData());
 
                 when(customer.getCustomer("CUST-001"))
                                 .thenReturn(null); // Customer does not exist
 
-                when(pricing.getPricing("123", null))
+                when(pricing.getPricing(SAMPLE_PRODUCT_ID, null))
                                 .thenReturn(BaseFixtures.getStandardPricingData());
 
-                when(availability.getAvailability("123"))
+                when(availability.getAvailability(SAMPLE_PRODUCT_ID))
                                 .thenReturn(BaseFixtures.getAvailabilityData());
 
-                ProductResponse result = sut.aggregate("123", "CUST-001");
+                ProductResponse result = sut.aggregate(SAMPLE_PRODUCT_ID, "CUST-001");
 
                 assertNull(result.customer());
 
                 assertNotNull(result.pricing());
                 assertEquals(100, result.pricing().finalPrice().intValue());
 
-                verify(pricing).getPricing("123", null);
+                verify(pricing).getPricing(SAMPLE_PRODUCT_ID, null);
         }
 
         @Test
         void shouldReturnStandardPricingWhenCustomerDoesNotExist() {
-                when(catalog.getCatalog("123"))
+                when(catalog.getCatalog(SAMPLE_PRODUCT_ID))
                                 .thenReturn(BaseFixtures.getCatalogData());
 
                 when(customer.getCustomer("INVALID-CUSTOMER"))
                                 .thenThrow(new CustomerNotFoundException(
                                                 "Customer not found: INVALID-CUSTOMER"));
 
-                when(pricing.getPricing("123", null))
+                when(pricing.getPricing(SAMPLE_PRODUCT_ID, null))
                                 .thenReturn(BaseFixtures.getStandardPricingData());
 
-                when(availability.getAvailability("123"))
+                when(availability.getAvailability(SAMPLE_PRODUCT_ID))
                                 .thenReturn(BaseFixtures.getAvailabilityData());
 
                 ProductResponse result = sut.aggregate(
-                                "123",
+                                SAMPLE_PRODUCT_ID,
                                 "INVALID-CUSTOMER");
 
                 assertNotNull(result);
@@ -491,6 +492,6 @@ class AggregatorServiceTest {
                 assertNotNull(result.availability());
                 assertEquals(10, result.availability().stockLevel());
 
-                verify(pricing).getPricing("123", null);
+                verify(pricing).getPricing(SAMPLE_PRODUCT_ID, null);
         }
 }
