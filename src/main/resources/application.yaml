@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: aggregator
+server:
+  servlet:
+    context-path: /aggregator
+
+# todo: environment variables, vault
+security:
+  user:
+    name: aggregator
+    password: aggregator123
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
