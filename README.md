@@ -10,6 +10,8 @@
 - Clone the repository and run the Spring Boot application using the Gradle Wrapper.
 
 - Go to the root of the application ('aggregator' directory)
+- Execute commands described below to run via bootRun or via jar invocation
+  - it might take a while to build it and run for the 1st time as all the dependencies must be fetched etc. But once you see the following log in the terminal _Started AggregatorApplication in..._ you are ready to go and send requests.
 
 ### Linux / macOS
 
@@ -72,6 +74,12 @@ curl.exe -u aggregator:aggregator123 http://localhost:8080/aggregator/aggregate/
 ```
 
 # KEY DESIGN DECISIONS AND TRADE-OFFS
+
+## Technology Stack
+
+- Java 26
+- Spring Boot 4.1.1
+- Gradle
 
 ## Key Components/Solutions
 
@@ -209,11 +217,15 @@ This was intentionally not introduced because it would increase the API contract
   - local development,
   - CI/CD,
   - test/staging,
-- production
+  - production
 
 - For the sake of clarity and simplicity, the current implementation intentionally keeps the configuration in a single file. This makes the project easier to run and review while keeping the configuration straightforward.
 
 ## WHAT COULD BE DONE DIFFERENTLY WITH MORE TIME
+
+### GO instead Java
+
+Just heard that Go is also a great way to build microservices, with less memory footprint, requirements compared to Java/Spring Boot etc. My stack is Java/Python/ a bit Rust if we talk about Backend. I've had no opportunity to work in Go so far thus decided to use Java.
 
 ### DECLARATIVE PROVIDERS
 
@@ -221,7 +233,7 @@ This was intentionally not introduced because it would increase the API contract
 
 - One possible implementation would be to inject a List<AggregationProvider<?>> into the aggregator. Each provider would expose its key and declare any dependencies it requires (like Pricing requires Customer in one scenario), while a generic aggregation engine would execute providers with no dependencies in parallel and resolve dependent providers once their prerequisites are available. The results could be stored in an AggregationContext or result registry and passed to the final response mapper. This would make adding a new provider mostly a matter of implementing the interface and registering the bean, without changing the aggregation flow itself.
 
-- For a significantly larger number of upstreams, an integration framework such as Apache Camel could also be considered. Camel provides routing, parallel processing, error handling and aggregation patterns out of the box, which could reduce the amount of custom orchestration code. For the current scope, however, introducing such a framework would add unnecessary complexity, so a lightweight provider-based aggregation model is sufficient.
+- For a significantly larger number of microservices, an integration framework such as Apache Camel could also be considered. Camel provides routing, parallel processing, error handling and aggregation patterns out of the box, which could reduce the amount of custom orchestration code in the microservices directly. This orchestration code would then be part of some higher level (and no, it's not easy, trivial if we have many microservices). For the current scope introducing such a framework would add unnecessary complexity, so a lightweight provider-based aggregation model is sufficient.
 
 ### Environment-specific configuration
 
@@ -276,16 +288,15 @@ Profiles could also determine which provider implementations are instantiated. F
 ### Integration testing with real dependencies
 
 - The current provider implementations are local mocks, so Testcontainers would not provide significant additional value at this stage.
-- Once real provider implementations are introduced, Testcontainers could be used to test integrations with real infrastructure such as databases or containerized HTTP dependencies.
+- Once real provider implementations are introduced, Testcontainers could be used to test integrations with real infrastructure such as containerized HTTP dependencies.
 
 ### Concurrency and load testing
 
 - Additional tests could verify the behavior of the aggregator under load
 
-### Test data and fixture refactoring
+### Test data (tests and mocks) and fixture refactoring
 
-- Some hardcoded test data could be centralized and reused more consistently, for example through shared constants, enums or fixture builders.
-  This would reduce duplication and make the test suite easier to maintain as the number of test scenarios grows.
+- Some hardcoded test data could be centralized and reused more consistently, for example through shared constants, enums or fixture builders. This would reduce duplication and make the test suite easier to maintain as the number of test scenarios grows. And yes, AI could help but free AI solutions are not as good as commercial ones and this task requires passing bigger context (to have consistency across many files/modules). Thus the tests were generated step by step without full necessary context so the final state is not ideal.
 
 ### Localization
 
